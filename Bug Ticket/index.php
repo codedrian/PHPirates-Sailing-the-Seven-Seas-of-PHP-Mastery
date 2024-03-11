@@ -36,7 +36,7 @@ unset($_SESSION["errors"]);
         <div class="form-container">
             <form action="process.php" method="post">
                 <label for="date">Date:</label>
-                <input type="date" name="date">
+                <input type="date" id="date" name="date" value="<?php echo date('Y-m-d'); ?>" max="<?php echo date('Y-m-d'); ?>" min="<?php echo date('Y-m-d'); ?>">
                 <label for="first_name">First Name:</label>
                 <input type="text" name="first_name">
                 <label for="last_name">Last Name:</label>
