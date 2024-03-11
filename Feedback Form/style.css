@@ -1,0 +1,18 @@
+* {
+    box-sizing: border-box;
+}
+form {
+    margin: 2rem auto;
+    width: fit-content;
+    font-size: 1.2rem;
+    label {
+        padding: 0.3rem;
+        margin:0.4rem 0 0.2rem 0;
+    }
+    input, select, textarea {
+        width: 100%;
+    }
+    input, label, select {
+        display: block;
+    }
+}
