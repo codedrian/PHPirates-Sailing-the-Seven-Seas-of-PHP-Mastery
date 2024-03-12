@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $errors = [];
     $date = (isset($_POST["date"])) ? htmlspecialchars($_POST["date"]) : "";
     if (strlen($date) == 0) {
