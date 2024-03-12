@@ -31,28 +31,31 @@ $result = fetch_all($query);
 
 <body>
     <main>
+        <section class="notification-section">
+            <ul>
+                <?php
+                if (!empty($errors)) :
+                    foreach ($errors as $error) :
+                ?>
+                        <li><?= $error ?></li>
+                <?php
+                    endforeach;
+                    header("Refresh: 3");
+                endif;
+                ?>
 
-        <ul>
-            <?php
-            if (!empty($errors)) :
-                foreach ($errors as $error) :
-            ?>
-                    <li><?= $error ?></li>
-            <?php
-                endforeach;
-            endif;
-            ?>
-
-            <?php
-            if (!empty($message)) :
-                foreach ($message as $messages) :
-            ?>
-                    <li><?= $messages ?></li>
-            <?php
-                endforeach;
-            endif;
-            ?>
-        </ul>
+                <?php
+                if (!empty($message)) :
+                    foreach ($message as $messages) :
+                ?>
+                        <li><?= $messages ?></li>
+                <?php
+                    endforeach;
+                    header("Refresh: 3");
+                endif;
+                ?>
+            </ul>
+        </section>
 
         <table>
             <tr>
@@ -62,9 +65,9 @@ $result = fetch_all($query);
             <?php
             if (empty($result)) :
             ?>
-            <tr>
-                <td colspan="2">No data available</td>
-            </tr>
+                <tr>
+                    <td colspan="2">No data available</td>
+                </tr>
             <?php
             endif;
             ?>
@@ -85,7 +88,7 @@ $result = fetch_all($query);
             <input type="text" name="contact_number">
             <label for="date">Date</label>
             <input type="date" name="date" min="<?php echo date('Y-m-d'); ?>">
-            <input type="submit">
+            <input type="submit" class="form-submit-button">
 
         </form>
     </main>
