@@ -1,0 +1,27 @@
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    margin: 0 auto;
+    margin-bottom: 3rem;
+    & label {
+        font-size: 1.3rem;
+        padding: 0.5rem 0 0.3rem 0;
+    }
+    & input {
+        height: 1.5rem;
+    }
+}
+.login-form {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    margin: 0 auto;
+    & label {
+        font-size: 1.3rem;
+        padding: 0.5rem 0 0.3rem 0;
+    }
+    & input {
+        height: 1.5rem;
+    }
+}
