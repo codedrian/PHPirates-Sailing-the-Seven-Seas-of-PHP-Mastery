@@ -1,45 +1,99 @@
 <?php
+session_start();
+require_once("connection.php");
 
-if ($_SERVER['REQUEST_METHOD'] && $_SERVER['REQUEST_METHOD'] == 'POST') {
-    $errors = [];
-
-    if (isset($_POST['action']) && $_POST['action'] == 'submit_registration') {
-        //Name validations and sanitation
-        if (strlen($_POST['first_name']) > 0) {
-            $first_name = isset($_POST['first_name']) ? filter_var($_POST['first_name'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
-        } else {
+    //NOTE: For registration
+if ( $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'submit_registration') {
+        //NOTE: Name validations and sanitation
+        if (strlen($_POST['first_name']) < 2) {
+            $errors[] = "First name must be 2 characters long!";
+        } else if (preg_match('/\d/', $_POST['first_name'])) {
+            $errors[] = "First name must not contain number!";
+        } else if (strlen($_POST['first_name']) == 0) {
             $errors[] = "First name is required!";
+        } else {
+            $first_name = isset($_POST['first_name']) ? filter_var($_POST['first_name'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
         }
 
-        if (strlen($_POST['first_name']) > 0) {
-            $last_name = isset($_POST['last_name']) ? filter_var($_POST['last_name'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
-        } else {
+        if (strlen($_POST['last_name']) < 2) {
+            $errors[] = "Last name must be 2 characters long!";
+        }
+        else if (preg_match('/\d/', $_POST['last_name'])) {
+            $errors[] = "Last name must not contain number!";
+        }
+        else if (strlen($_POST['last_name']) == 0) {
             $errors[] = "Last name is required!";
-        }
-
-        if (strlen($_POST['phone_number']) > 0) {
-            $phone_number = isset($_POST['phone_number']) ? filter_var($_POST['phone_number'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
         } else {
+            $last_name = isset($_POST['last_name']) ? filter_var($_POST['last_name'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
+        }
+        //NOTE: Validation and sanitation for Phone number
+        if (strlen($_POST['phone_number']) == 0) {
             $errors[] = "Phone number is required!";
         }
-
-        if (strlen($_POST['password']) > 0) {
-            $password = isset($_POST['password']) ? filter_var($_POST['password'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
+        else if (preg_match('/[a-zA-Z]/', $_POST['phone_number'])) {
+            $errors[] = "Phone number is required and must not contain letter!";
         } else {
+            $phone_number = isset($_POST['phone_number']) ? filter_var($_POST['phone_number'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
+        }
+        //NOTE: Validation and sanitation for Password
+        if (strlen($_POST['password']) == 0) {
             $errors[] = "Password is required!";
-        }
-
-        if (strlen($_POST['confirm_password']) > 0) {
-            $confirm_password = isset($_POST['confirm_password']) ? filter_var($_POST['confirm_password'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
+        } else if (strlen($_POST['password']) < 8) {
+            $errors[] = "Password length must be greater than 8!";
         } else {
+            $password = isset($_POST['password']) ? filter_var($_POST['password'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
+            //TODO: Change the password hash using Argon2id algorithm
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        }
+        //NOTE: Validation and sanitation for confirm password
+        if (strlen($_POST['confirm_password']) == 0) {
             $errors[] = "Please confirm your password!";
-        }
-
-        if ((strlen($_POST['confirm_password']) > 0) && ($_POST['confirm_password'] !== $_POST['password'])) {
+        } else if (($_POST['confirm_password'] !== $_POST['password'])) {
             $errors = "Password don't match!";
+        } else {
+                $confirm_password = isset($_POST['confirm_password']) ? filter_var($_POST['confirm_password'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
         }
-
-        var_dump($errors);
+    if (!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        header('Location: index.php');
+        exit();
+    } else {
+        //I used prepared statements here
+        $query = "INSERT INTO auth1_users (first_name, last_name, phone_number, hashed_password)
+                VALUES (?, ?, ?, ?)";
+        $statement = $connection->prepare($query);
+        $statement->bind_param('ssss', $first_name, $last_name, $phone_number, $hashed_password);
+        $statement->execute();
+        $statement->close();
+        header('Location: dashboard.php');
+        exit();
     }
+}
 
+
+
+//NOTE: For logging in
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'submit_login') {
+    $phone_number = (isset($_POST['phone_number'])) ? $_POST['phone_number'] : '';
+    $password = (isset($_POST['password'])) ? $_POST['password'] : '';
+
+    $query = "SELECT hashed_password FROM auth1_users WHERE phone_number = ?";
+    $statement = $connection->prepare($query);
+    $statement -> bind_param('s', $phone_number);
+    $statement -> execute();
+    $statement -> bind_result($hashedPassword);
+    $statement -> fetch();
+    $statement->close();
+
+    if (password_verify($password, $hashedPassword,)) {
+        $_SESSION['is_logged_in'] = TRUE;
+        header('Location: dashboard.php');
+        exit();
+    }
+    else {
+        $messages = ['User not found.'];
+        $_SESSION['messages'] = $messages;
+        header('Location: index.php');
+        exit();
+    }
 }
