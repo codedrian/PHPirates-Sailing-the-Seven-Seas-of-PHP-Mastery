@@ -1,4 +1,21 @@
 <?php
+session_start();
+
+if (isset($_SESSION['errors'])) {
+    $errors = $_SESSION['errors'];
+    unset($_SESSION['errors']);
+    // header('refresh: 2');
+} else {
+    $errors = [];
+}
+if (isset($_SESSION['messages'])) {
+    $messages = $_SESSION['messages'];
+    unset($_SESSION['messages']);
+    // header('refresh: 2');
+} else {
+    $messages = [];
+}
+
 
 ?>
 <!DOCTYPE html>
@@ -13,6 +30,29 @@
 
 <body>
     <main>
+        <div>
+            <?php
+            if (!empty($errors)) :
+                foreach ($errors as $error) :
+            ?>
+                    <p><?= $error ?></p>
+            <?php
+                endforeach;
+            endif;
+            ?>
+            <?php
+            if (!empty($messages)) :
+                foreach ($messages as $message) :
+            ?>
+                    <p><?= $message ?></p>
+            <?php
+                endforeach;
+            endif;
+            ?>
+        </div>
+        <header>
+            <h1>Register</h1>
+        </header>
         <form action="process.php" method="post" class="registration-form">
             <input type="hidden" name="action" value="submit_registration">
             <label for="first_name">First name:</label>
@@ -27,6 +67,9 @@
             <input type="text" name="confirm_password">
             <input type="submit">
         </form>
+        <header>
+            <h1>Log in</h1>
+        </header>
         <form action="process.php" method="post" class="login-form">
             <input type="hidden" name="action" value="submit_login">
             <label for="phone_number">Phone number</label>
