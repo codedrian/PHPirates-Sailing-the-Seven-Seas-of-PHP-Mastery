@@ -16,7 +16,11 @@ if (isset($_SESSION['messages'])) {
     $messages = [];
 }
 
-
+if (isset($_POST['forgot_password'])) {
+    // Redirect the user to the password reset page
+    header('Location: reset_password.php');
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,7 +34,7 @@ if (isset($_SESSION['messages'])) {
 
 <body>
     <main>
-        <div>
+        <div class="error-message-container">
             <?php
             if (!empty($errors)) :
                 foreach ($errors as $error) :
@@ -77,6 +81,11 @@ if (isset($_SESSION['messages'])) {
             <label for="password">Password:</label>
             <input type="text" name="password">
             <input type="submit">
+        </form>
+
+        <form action="reset_password.php" method="post" class="password_reset_button">
+            <input type="hidden" name="action" value="reset_password">
+            <input type="submit" value="Reset password?">
         </form>
     </main>
 </body>
