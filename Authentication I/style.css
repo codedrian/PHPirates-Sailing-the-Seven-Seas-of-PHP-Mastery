@@ -1,15 +1,21 @@
 main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .error-message-container {
+        color: red;
+        line-height: 0.3rem;
+    }
     header {
         h1 {
-        margin: 0 auto;
         width: fit-content;
+        }
     }
-}
-.registration-form {
+    .registration-form {
     display: flex;
     flex-direction: column;
     width: 30%;
-    margin: 0 auto;
     margin-bottom: 3rem;
     & label {
         font-size: 1.3rem;
@@ -19,18 +25,40 @@ main {
         height: 1.5rem;
     }
 }
-.login-form {
-    display: flex;
-    flex-direction: column;
-    width: 30%;
-    margin: 0 auto;
-    & label {
-        font-size: 1.3rem;
-        padding: 0.5rem 0 0.3rem 0;
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        width: 30%;
+        & label {
+            font-size: 1.3rem;
+            padding: 0.5rem 0 0.3rem 0;
+        }
+        & input {
+            height: 1.5rem;
+        }
     }
-    & input {
-        height: 1.5rem;
+    .reset_password_form {
+        display: flex;
+        flex-direction: column;
+        width: 20%;
+        & label {
+            font-size: 1.3rem;
+            padding: 0.5rem 0 0.3rem 0;
+        }
+        & input {
+            height: 1.5rem;
+        }
     }
-}
-
+    .password_reset_button {
+        display: flex;
+        flex-direction: column;
+        width: 30%;
+        & label {
+            font-size: 1.3rem;
+            padding: 0.5rem 0 0.3rem 0;
+        }
+        & input {
+            height: 1.5rem;
+        }
+    }
 }
