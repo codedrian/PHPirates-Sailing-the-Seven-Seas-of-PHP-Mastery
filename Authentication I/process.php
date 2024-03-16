@@ -2,8 +2,11 @@
 session_start();
 require_once("connection.php");
 
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+
     //NOTE: For registration
-if ( $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'submit_registration') {
+    if (isset($_POST['action']) && $_POST['action'] == 'submit_registration') {
+
         //NOTE: Name validations and sanitation
         if (strlen($_POST['first_name']) < 2) {
             $errors[] = "First name must be 2 characters long!";
@@ -53,47 +56,97 @@ if ( $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['
         } else {
                 $confirm_password = isset($_POST['confirm_password']) ? filter_var($_POST['confirm_password'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
         }
-    if (!empty($errors)) {
-        $_SESSION['errors'] = $errors;
-        header('Location: index.php');
-        exit();
-    } else {
-        //I used prepared statements here
-        $query = "INSERT INTO auth1_users (first_name, last_name, phone_number, hashed_password)
+
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            header('Location: index.php');
+            exit();
+        } else {
+            //I used prepared statements here
+            $query = "INSERT INTO auth1_users (first_name, last_name, phone_number, hashed_password)
                 VALUES (?, ?, ?, ?)";
-        $statement = $connection->prepare($query);
-        $statement->bind_param('ssss', $first_name, $last_name, $phone_number, $hashed_password);
-        $statement->execute();
-        $statement->close();
-        header('Location: dashboard.php');
-        exit();
+            $statement = $connection->prepare($query);
+            $statement->bind_param('ssss', $first_name, $last_name, $phone_number, $hashed_password);
+            $statement->execute();
+            $statement->close();
+            header('Location: dashboard.php');
+            exit();
+        }
     }
-}
+    //NOTE: For logging in
+    if (isset($_POST['action']) && $_POST['action'] == 'submit_login') {
+        $errors = [];
+        if (strlen($_POST['phone_number']) == 0) {
+            $errors[] = 'Please enter a phone number';
+        }
+        if (strlen($_POST['password']) == 0) {
+            $errors[] = 'Please enter a password';
+        }
 
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            header('Location: index.php');
+            exit();
+        }
+        else {
+            $phone_number = (isset($_POST['phone_number'])) ? $_POST['phone_number'] : '';
+            $password = (isset($_POST['password'])) ? $_POST['password'] : '';
 
+            $query = "SELECT hashed_password FROM auth1_users WHERE phone_number = ?";
+            $statement = $connection->prepare($query);
+            $statement->bind_param('s', $phone_number);
+            $statement->execute();
+            $statement->bind_result($hashedPassword);
+            $statement->fetch();
+            $statement->close();
 
-//NOTE: For logging in
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'submit_login') {
-    $phone_number = (isset($_POST['phone_number'])) ? $_POST['phone_number'] : '';
-    $password = (isset($_POST['password'])) ? $_POST['password'] : '';
-
-    $query = "SELECT hashed_password FROM auth1_users WHERE phone_number = ?";
-    $statement = $connection->prepare($query);
-    $statement -> bind_param('s', $phone_number);
-    $statement -> execute();
-    $statement -> bind_result($hashedPassword);
-    $statement -> fetch();
-    $statement->close();
-
-    if (password_verify($password, $hashedPassword,)) {
-        $_SESSION['is_logged_in'] = TRUE;
-        header('Location: dashboard.php');
-        exit();
+            if (password_verify($password, $hashedPassword,)) {
+                $_SESSION['is_logged_in'] = TRUE;
+                header('Location: dashboard.php');
+                exit();
+            } else {
+                $messages[] = 'User not found.';
+                $_SESSION['messages'] = $messages;
+                header('Location: index.php');
+                exit();
+            }
+        }
     }
-    else {
-        $messages = ['User not found.'];
-        $_SESSION['messages'] = $messages;
-        header('Location: index.php');
-        exit();
+    //NOTE: For resetting password
+    if (isset($_POST['action']) && $_POST['action'] == 'reset_password_form') {
+        if (strlen($_POST['phone_number']) == 0) {
+            $error = 'Please enter your phone number to reset!';
+        }
+        if (!empty($error)) {
+            $_SESSION['error'] = $error;
+            header('Location: reset_password.php');
+            exit();
+        } else {
+            $phone_number = (isset($_POST['phone_number'])) ? filter_var($_POST['phone_number'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
+
+            $query = "SELECT phone_number FROM auth1_users WHERE phone_number = ?";
+            $statement = $connection->prepare($query);
+            $statement->bind_param('s', $phone_number);
+            $statement->execute();
+            $statement->bind_result($result_phone_number);
+            $statement->fetch();
+
+            if ($result_phone_number) {
+                $message = 'You have successfully reset your password!';
+                $_SESSION['message'] = $message;
+                //TODO; If account is fount update the password to a default password
+                $query = "";
+                // header('Location: reset_password.php');
+                // exit();
+            } else {
+                $message = 'Account not found!!';
+                $_SESSION['message'] = $message;
+                header('Location: reset_password.php');
+            }
+        }
     }
+
+} else {
+    header('Location: index.php');
+    exit();
 }
