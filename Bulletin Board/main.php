@@ -1,6 +1,6 @@
 <?php
 require_once("new-connection.php");
-$query = "SELECT * FROM my_projects.bulletin_board";
+$query = "SELECT DATE_FORMAT(created_at, '%m-%d-%y') AS created_date, announcement_subject, announcement_detail FROM my_projects.bulletin_board";
 $result = fetch_all($query);
 ?>
 <!DOCTYPE html>
@@ -23,11 +23,11 @@ $result = fetch_all($query);
         if (!empty($result)) :
             foreach ($result as $row) :
         ?>
-            <div class="bulletin-card">
-                <h3><?= $row["announcement_subject"] ?></h3>
-                <p><?= $row["announcement_detail"] ?></p>
-            </div>
-        <?php
+                <div class="bulletin-card">
+                    <h3><?= $row["created_date"] . " " . $row["announcement_subject"] ?></h3>
+                    <p><?= $row["announcement_detail"] ?></p>
+                </div>
+            <?php
             endforeach;
             ?>
         <?php

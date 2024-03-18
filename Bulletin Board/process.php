@@ -27,9 +27,12 @@ if (!empty($error)) {
     exit();
 }
 else {
-    $query = "INSERT INTO my_projects.bulletin_board(announcement_subject, announcement_detail)
-        VALUES('{$announcement_subject}','{$announcement_detail}')";
-    run_mysql_query($query);
+    $query = "INSERT INTO bulletin_board(announcement_subject, announcement_detail, created_at) VALUES(?, ?, NOW())";
+
+    $statement = $connection->prepare($query);
+    $statement -> bind_param('ss', $announcement_subject, $announcement_detail);
+    $statement -> execute();
+    $statement -> close();
 
     header("Location: main.php");
     exit();
