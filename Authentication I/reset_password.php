@@ -6,6 +6,7 @@ session_start();
 //     header('Location: index.php');
 //     exit();
 // }
+
 if (isset($_SESSION['error'])) {
     $error = $_SESSION['error'];
 }
@@ -52,6 +53,7 @@ unset($_SESSION['message']);
             <input type="text" name="phone_number">
             <input type="submit">
         </form>
+        <button><a href="index.php">Back</a></button>
     </main>
 </body>
 
