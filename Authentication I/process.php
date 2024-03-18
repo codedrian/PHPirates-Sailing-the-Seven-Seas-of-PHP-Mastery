@@ -130,14 +130,29 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $statement->execute();
             $statement->bind_result($result_phone_number);
             $statement->fetch();
+            $statement->close();
 
             if ($result_phone_number) {
                 $message = 'You have successfully reset your password!';
                 $_SESSION['message'] = $message;
-                //TODO; If account is fount update the password to a default password
-                $query = "";
-                // header('Location: reset_password.php');
-                // exit();
+                //NOTE: If account is found update the password to a default password
+                $default_password = 'village88';
+                $new_hashed_password = password_hash($default_password, PASSWORD_DEFAULT);
+                $update_query = "UPDATE auth1_users SET hashed_password = ? WHERE $phone_number = ?";
+                $update_statement = $connection -> prepare($update_query);
+                $update_statement -> bind_param('ss', $new_hashed_password, $result_phone_number);
+                $update_statement -> execute();
+
+                if ($update_statement->affected_rows > 0) {
+                    $message = 'Reset password successfully!!';
+                    $_SESSION['message'] = $message;
+                } else {
+                    $message = 'Error resetting password';
+                    $_SESSION['message'] = $message;
+                }
+                $update_statement -> close();
+                header('Location: reset_password.php');
+                exit();
             } else {
                 $message = 'Account not found!!';
                 $_SESSION['message'] = $message;
@@ -145,7 +160,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
     }
-
 } else {
     header('Location: index.php');
     exit();
