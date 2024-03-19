@@ -13,8 +13,8 @@ unset($_SESSION["errors"]);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Blog | Signin</title>
+    <link rel="stylesheet" href="forms.css">
+    <title>Blog | Register</title>
 </head>
 
 <body>
@@ -60,7 +60,7 @@ unset($_SESSION["errors"]);
                 <span>Confirm password</span>
             </label>
             <input type="submit" class="submit">
-            <p class="signin">Already have an account ? <a href="#">Sign in</a> </p>
+            <p class="signin">Already have an account ? <a href="log_in.php">Sign in</a> </p>
         </form>
     </main>
 </body>
