@@ -1,0 +1,25 @@
+/* NOTE: Color palette : #EFBC9B #FBF3D5 #D6DAC8 #9CAFAA */
+header {
+    display: flex;
+    align-items: center;
+    background-color: #EFBC9B;
+    nav {
+        margin-left: auto;
+        margin-right: 4rem;
+        display: flex;
+        align-items: center;
+        & h3 {
+            margin: 0 0.5rem 0 0.5rem;
+        }
+    }
+}
+main {
+    section {
+        h3 {
+            font-size: 2rem;
+        }
+        p {
+            font-size: 1.3rem;
+        }
+    }
+}
