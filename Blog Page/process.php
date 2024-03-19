@@ -2,6 +2,7 @@
 session_start();
 require_once("connection.php");
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    //NOTE: This code processes the registration submission
     if (isset($_POST["action"]) && $_POST["action"] == "submit_registration") {
         //NOTE: Sanitation and validation for firstname and lastname
         if (strlen($_POST["first_name"]) == 0) {
@@ -60,7 +61,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     }
-    //NOTE: For log in
+    //NOTE: This code processes the logout submission
+    if (isset($_POST["action"]) && $_POST["action"] == "logout") {
+        session_destroy();
+        header("Location: sign_in.php");
+        exit();
+    }
+    //NOTE: This code processes the login submission
     if (isset($_POST["action"]) && $_POST["action"] == "submit_login") {
         if (strlen($_POST["email"]) == 0) {
             $errors[] = "Please enter your email address";
@@ -82,11 +89,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $email = (isset($_POST["email"])) ? $_POST["email"] : "";
             $confirm_password = (isset($_POST["password"])) ? $_POST["password"] : "";
 
-            $query = "SELECT first_name, last_name, password FROM users WHERE email = ?";
+            $query = "SELECT id, first_name, last_name, password FROM users WHERE email = ?";
             $statement = $connection -> prepare($query);
             $statement -> bind_param("s", $email);
             $statement -> execute();
-            $statement -> bind_result($first_name, $last_name, $hashed_password);
+            $statement -> bind_result($id, $first_name, $last_name, $hashed_password);
             $statement->fetch();
             $statement->close();
 
@@ -94,6 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (password_verify($confirm_password, $hashed_password)) {
                 //NOTE: Store the datas form the database to session variable
                 $_SESSION["is_logged_in"] = TRUE;
+                $_SESSION["id"] = $id;
                 $_SESSION["first_name"] = $first_name;
                 $_SESSION["last_name"] = $last_name;
                 header("Location: dashboard.php");
@@ -107,13 +115,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     }
-    if (isset($_POST["action"]) && $_POST["action"] == "logout") {
-        session_destroy();
-        header("Location: sign_in.php");
-        exit();
+    //NOTE: This code processes the review submission
+    if (isset($_POST["action"]) && $_POST["action"] == "submit_review") {
+        if (strlen($_POST["review"]) == 0) {
+            $errors[] = "Please input your review";
+        }
+        if (!empty($errors)) {
+            $_SESSION["errors"] = $errors;
+            header("Location: dashboard.php");
+            exit();
+        } else {
+            $review = (isset($_POST["review"]))  ? filter_var($_POST["review"], FILTER_SANITIZE_SPECIAL_CHARS) : "";
+            $user_id = $_SESSION["id"];
+
+            $query = "INSERT INTO reviews (user_id, content) VALUES (?, ?)";
+            $statement = $connection -> prepare($query);
+            $statement -> bind_param("is", $user_id, $review);
+            $statement -> execute();
+            $statement -> close();
+            header("Location: dashboard.php");
+            exit();
+        }
     }
 } else {
     header("Location: sign_in.php");
     exit();
 }
+
 //accounts:
