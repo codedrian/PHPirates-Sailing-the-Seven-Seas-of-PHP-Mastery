@@ -1,4 +1,7 @@
 /* NOTE: Color palette : #EFBC9B #FBF3D5 #D6DAC8 #9CAFAA */
+html {
+    background-color: #FBF3D5;
+}
 header {
     display: flex;
     align-items: center;
@@ -14,12 +17,47 @@ header {
     }
 }
 main {
+
+    ul > li {
+        color: red;
+        font-size: 1.2rem;
+        line-height: 1.5rem;
+        list-style-type: none;
+    }
     section {
         h3 {
             font-size: 2rem;
         }
         p {
             font-size: 1.3rem;
+        }
+    }
+    form {
+        display: flex;;
+        flex-direction: column;
+        width: 40%;
+        margin: 0 auto;
+    }
+    .user_reviews_section {
+        display: flex;
+        flex-direction: column;
+        width: 60%;
+        margin: 3rem auto;
+        text-align: center;
+        .user_reviews {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+            outline: 0.3rem solid black;
+            .user {
+            font-size: 1.3rem;
+            font-weight: 700;
+            }
+            .user_review_content {
+                font-size: 1.2rem;
+                min-height: 100%;
+                max-height: fit-content;
+            }
         }
     }
 }
