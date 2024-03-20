@@ -19,6 +19,10 @@ unset($_SESSION["errors"]);
 
 <body>
     <main>
+        <form action="process.php" method="post" class="anonymous">
+            <input type="hidden" name="action" value="submit_anonymous_user">
+            <input type="submit" value="Visit site anonymously?">
+        </form>
         <ul>
         <?php
         if (!empty($errors)) :
@@ -60,7 +64,8 @@ unset($_SESSION["errors"]);
                 <span>Confirm password</span>
             </label>
             <input type="submit" class="submit">
-            <p class="signin">Already have an account ? <a href="log_in.php">Sign in</a> </p>
+            <p class="signin">Already have an account ? <a href="log_in.php">Sign in</a></p>
+
         </form>
     </main>
 </body>
