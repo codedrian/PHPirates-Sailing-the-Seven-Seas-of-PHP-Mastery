@@ -1,7 +1,28 @@
 <?php
 session_start();
 require_once("connection.php");
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+     //NOTE: This function processes the fetching of replies
+    function fetchReviewsAndReply()
+    {
+        $query = "SELECT
+                            CONCAT(users.first_name, ' ', users.last_name) AS reviewer_name,
+                            reviews.id AS review_id,
+                            reviews.content AS review_content,
+                            reviews.created_at AS review_created_at,
+                            GROUP_CONCAT(replies.content) AS reply_content,
+                            GROUP_CONCAT(replies.created_at) AS reply_created_at
+                        FROM
+                            users
+                        INNER JOIN reviews ON users.id = reviews.user_id
+                        LEFT JOIN replies ON reviews.id = replies.review_id
+                        GROUP BY
+                            reviews.id
+                        ORDER BY
+                            reviews.created_at DESC, replies.created_at ASC";
+        return fetch_all($query);
+    }
     //NOTE: This code processes the registration submission
     if (isset($_POST["action"]) && $_POST["action"] == "submit_registration") {
         //NOTE: Sanitation and validation for firstname and lastname
@@ -26,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $sanitized_email = (isset($_POST["email"])) ? filter_var($_POST["email"], FILTER_SANITIZE_EMAIL) : "";
             if (!filter_var($sanitized_email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "{$sanitized_email} is not a valid email address";
+                $errors[] = "{$sanitized_email} is not a valid email address";
             }
         }
 
@@ -48,14 +69,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION["errors"] = $errors;
             header("Location: sign_in.php");
             exit();
-        }
-        else {
+        } else {
             $query = "INSERT INTO users (first_name, last_name, email, password)
                         VALUES (?, ?, ?, ?)";
             $statement = $connection->prepare($query);
-            $statement -> bind_param("ssss", $sanitized_first_name, $sanitized_last_name, $sanitized_email, $hashed_password);
-            $statement -> execute();
-            $statement -> close();
+            $statement->bind_param("ssss", $sanitized_first_name, $sanitized_last_name, $sanitized_email, $hashed_password);
+            $statement->execute();
+            $statement->close();
             $_SESSION["is_logged_in"] = TRUE;
             header("Location: dashboard.php");
             exit();
@@ -90,10 +110,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $confirm_password = (isset($_POST["password"])) ? $_POST["password"] : "";
 
             $query = "SELECT id, first_name, last_name, password FROM users WHERE email = ?";
-            $statement = $connection -> prepare($query);
-            $statement -> bind_param("s", $email);
-            $statement -> execute();
-            $statement -> bind_result($id, $first_name, $last_name, $hashed_password);
+            $statement = $connection->prepare($query);
+            $statement->bind_param("s", $email);
+            $statement->execute();
+            $statement->bind_result($id, $first_name, $last_name, $hashed_password);
             $statement->fetch();
             $statement->close();
 
@@ -104,10 +124,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION["id"] = $id;
                 $_SESSION["first_name"] = $first_name;
                 $_SESSION["last_name"] = $last_name;
+
+                //NOTE: to fetch reviews
+                $results = fetchReviewsAndReply();
+                $_SESSION["results"] = $results;
                 header("Location: dashboard.php");
                 exit();
-            }
-            else {
+            } else {
                 $message[] = "User not found!";
                 $_SESSION["message"] = $message;
                 header("Location: log_in.php");
@@ -115,8 +138,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     }
-    //NOTE: This code processes the review submission
-    if (isset($_POST["action"]) && $_POST["action"] == "submit_review") {
+    //NOTE: This code processes the reviews submission
+    if (isset($_POST["action"]) && $_POST["action"] == "submit_review") {gi
         if (strlen($_POST["review"]) == 0) {
             $errors[] = "Please input your review";
         }
@@ -129,10 +152,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $user_id = $_SESSION["id"];
 
             $query = "INSERT INTO reviews (user_id, content) VALUES (?, ?)";
+            $statement = $connection->prepare($query);
+            $statement->bind_param("is", $user_id, $review);
+            $statement->execute();
+            $statement->close();
+            //NOTE: to fetch reviews
+            $results = fetchReviewsAndReply();
+            $_SESSION["results"] = $results;
+
+            header("Location: dashboard.php");
+            exit();
+        }
+    }
+    //NOTE: This code processes the anonymous user
+    if (isset($_POST["action"]) && $_POST["action"] == "submit_anonymous_user") {
+        $_SESSION["is_logged_in"] = FALSE;
+
+            $results = fetchReviewsAndReply();
+            $_SESSION["results"] = $results;
+        header("Location: dashboard.php");
+        exit();
+    }
+    //NOTE: This code processes the reply submission
+    if (isset($_POST["action"]) && $_POST["action"] == "user_reply") {
+        $review_id = isset($_POST["review_id"]) ? $_POST["review_id"] : "";
+        $user_id = isset($_SESSION["id"]) ? $_SESSION["id"] : "";
+        $reply_content = isset($_POST["userReplyContent"]) ? $_POST["userReplyContent"] : "";
+        // $reply_user_first_name = isset($_SESSION["first_name"]) ? $_SESSION["first_name"] : "";
+        // $reply_user_first_name = isset($_SESSION["last_name"]) ? $_SESSION["last_name"] : "";
+        var_dump($user_id);
+        //COMMENT: Validations
+        if (strlen($_POST["userReplyContent"]) == 0) {
+            $errors[] = "Reply cannot be empty";
+            $_SESSION["errors"] = $errors;
+        }
+        if (!empty($errors)) {
+            header("Location: dashboard.php");
+            exit();
+        } else {
+            $query = "INSERT INTO replies(review_id, user_id, content) VALUES (?, ?, ?)";
+
             $statement = $connection -> prepare($query);
-            $statement -> bind_param("is", $user_id, $review);
+            $statement -> bind_param("iis", $review_id, $user_id, $reply_content);
             $statement -> execute();
-            $statement -> close();
+            $statement  -> close();
+
+            //NOTE: to fetch reviews
+            $results = fetchReviewsAndReply();
+            $_SESSION["results"] = $results;
             header("Location: dashboard.php");
             exit();
         }
