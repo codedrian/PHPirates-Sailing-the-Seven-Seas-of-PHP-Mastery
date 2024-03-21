@@ -139,7 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     //NOTE: This code processes the reviews submission
-    if (isset($_POST["action"]) && $_POST["action"] == "submit_review") {gi
+    if (isset($_POST["action"]) && $_POST["action"] == "submit_review") {
         if (strlen($_POST["review"]) == 0) {
             $errors[] = "Please input your review";
         }
