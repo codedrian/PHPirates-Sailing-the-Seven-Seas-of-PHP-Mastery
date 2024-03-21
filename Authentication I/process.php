@@ -52,7 +52,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (strlen($_POST['confirm_password']) == 0) {
             $errors[] = "Please confirm your password!";
         } else if (($_POST['confirm_password'] !== $_POST['password'])) {
-            $errors = "Password don't match!";
+            $errors[] = "Password don't match!";
         } else {
                 $confirm_password = isset($_POST['confirm_password']) ? filter_var($_POST['confirm_password'], FILTER_SANITIZE_SPECIAL_CHARS) : '';
         }
@@ -100,7 +100,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $statement->fetch();
             $statement->close();
 
-            if (password_verify($password, $hashedPassword,)) {
+            if (password_verify($password, $hashedPassword)) {
                 $_SESSION['is_logged_in'] = TRUE;
                 header('Location: dashboard.php');
                 exit();
