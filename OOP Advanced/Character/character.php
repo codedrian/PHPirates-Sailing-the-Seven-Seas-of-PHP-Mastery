@@ -24,12 +24,48 @@ class Character {
     }
     public function showStats()
     {
-        echo $this->name ."\n";
-        echo $this->health . "\n";
-        echo $this->stamina . "\n";
-        echo $this->health . "\n";
+        echo "Name: " . $this->name ."\n";
+        echo "Health: " . $this->health . "\n";
+        echo "Stamina: " . $this->stamina . "\n";
+        echo "Mana: " . $this->mana . "\n";
+        echo "\n";
         return $this;
     }
 }
-$character = new Character("Character");
-$character->walk()->walk()->walk()->run()->run()->showStats();
+class Shaman extends Character
+{
+    public function __construct($name)
+    {
+        parent::__construct($name);
+        $this->health = 150;
+    }
+    public function heal()
+    {
+        $this->health += 5;
+        $this->stamina += 5;
+        $this->mana += 5;
+        return $this;
+    }
+}
+class Swordsman extends Character
+{
+    public function __construct($name) {
+        parent::__construct($name);
+        $this->health = 170;
+    }
+    public function slash()
+    {
+        $this->mana -= 10;
+        return $this;
+    }
+    public function showStats() {
+        echo "I am powerful" . "\n";
+        parent::showStats();
+    }
+}
+
+$character = new Character("Blueprint");
+$shaman = new Shaman("Jerome");
+$swordsman = new Swordsman("Adrian");
+$shaman->showStats();
+$swordsman->slash()->showStats();
